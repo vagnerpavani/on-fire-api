@@ -1,6 +1,8 @@
 import { createApp } from './app';
+import { loadEnv } from './config';
 
 async function bootstrap() {
-  const app = await createApp();
+  loadEnv();
+  await createApp();
 }
 bootstrap();
