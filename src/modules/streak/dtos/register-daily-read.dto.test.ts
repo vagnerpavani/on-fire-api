@@ -9,7 +9,6 @@ describe('RegisterDailyReadDto', () => {
     const today = dayjs();
     const year = today.year().toString().slice(1, 3);
     const postId = `post_${year}-${today.month() + 1}-${dayjs().date()}`;
-    console.log('POST_ID: ', postId);
     return {
       email: faker.internet.email(),
       postId: postId,
@@ -24,7 +23,6 @@ describe('RegisterDailyReadDto', () => {
 
   it('should return no errors for a valid DTO', async () => {
     const validDto = createValidDTO();
-    console.log(validDto);
     const dto = plainToInstance(RegisterDailyReadDto, validDto);
     const errors = await validate(dto);
 
