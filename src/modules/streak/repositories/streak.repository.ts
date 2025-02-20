@@ -1,8 +1,6 @@
 import { Pool } from 'pg';
 import { db } from 'src/config/db';
-import { User } from 'src/modules/streak/entities/User';
-import { Post } from '../entities/Post';
-import { Read } from '../entities/Read';
+import { Read } from '../entities';
 
 export class StreakRepository {
   constructor(private readonly database: Pool) {}

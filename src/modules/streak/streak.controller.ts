@@ -1,4 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  InternalServerErrorException,
+  Post,
+} from '@nestjs/common';
 import { RegisterDailyReadUseCase } from './use-cases';
 import { RegisterDailyReadDto } from './dtos';
 
@@ -9,12 +14,13 @@ export class StreakController {
   ) {}
 
   @Post()
-  async registerRead(@Body() body: RegisterDailyReadDto) {
+  async registerDailyRead(@Body() body: RegisterDailyReadDto) {
     try {
       await this.registerDailyReadUseCase.execute(body);
       return;
     } catch (err) {
       console.log(err);
+      return new InternalServerErrorException();
     }
   }
 }
