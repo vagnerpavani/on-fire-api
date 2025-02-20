@@ -1,3 +1,4 @@
+import * as dayjs from 'dayjs';
 import { RegisterDailyReadDto } from '../../dtos/register-daily-read.dto';
 import {
   makePostRepository,
@@ -16,6 +17,13 @@ export class RegisterDailyReadUseCase {
   ) {}
 
   async execute(read: RegisterDailyReadDto) {
+    const publishedDate = dayjs(read.publishedAt).startOf('day');
+    const today = dayjs().startOf('day');
+
+    const isTodayPost = today.isSame(publishedDate);
+
+    if (!isTodayPost) return;
+
     const userExists = await this.userRepository.getUserByEmail(read.email);
     const postExists = await this.postRepository.getPostByBeehivId(read.postId);
 
