@@ -1,11 +1,18 @@
 import {
   Body,
   Controller,
+  HttpStatus,
   InternalServerErrorException,
   Post,
+  Res,
 } from '@nestjs/common';
-import { RegisterDailyReadUseCase } from './use-cases';
+import {
+  DailyReadAlreadyExistException,
+  NotTodayPostException,
+  RegisterDailyReadUseCase,
+} from './use-cases';
 import { RegisterDailyReadDto } from './dtos';
+import { Response } from 'express';
 
 @Controller('streak')
 export class StreakController {
@@ -14,11 +21,21 @@ export class StreakController {
   ) {}
 
   @Post()
-  async registerDailyRead(@Body() body: RegisterDailyReadDto) {
+  async registerDailyRead(
+    @Body() body: RegisterDailyReadDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     try {
       await this.registerDailyReadUseCase.execute(body);
       return;
     } catch (err) {
+      if (
+        err instanceof NotTodayPostException ||
+        err instanceof DailyReadAlreadyExistException
+      ) {
+        res.status(HttpStatus.OK);
+        return;
+      }
       console.log(err);
       return new InternalServerErrorException();
     }

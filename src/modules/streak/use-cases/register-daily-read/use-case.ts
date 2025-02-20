@@ -8,6 +8,10 @@ import {
   StreakRepository,
   UserRepository,
 } from '../../repositories';
+import {
+  DailyReadAlreadyExistException,
+  NotTodayPostException,
+} from '../protocols';
 
 export class RegisterDailyReadUseCase {
   constructor(
@@ -22,7 +26,7 @@ export class RegisterDailyReadUseCase {
 
     const isTodayPost = today.isSame(publishedDate);
 
-    if (!isTodayPost) return;
+    if (!isTodayPost) throw new NotTodayPostException();
 
     const userExists = await this.userRepository.getUserByEmail(read.email);
     const postExists = await this.postRepository.getPostByBeehivId(read.postId);
@@ -42,7 +46,7 @@ export class RegisterDailyReadUseCase {
     const readAlreadyExists =
       await this.streakRepository.findReadByPostAndUserId(user.id, post.id);
 
-    if (readAlreadyExists) return;
+    if (readAlreadyExists) throw new DailyReadAlreadyExistException();
 
     return await this.streakRepository.createRead(user.id, post.id, {
       source: read.utmSource,
