@@ -1,4 +1,4 @@
-import { RegisterReadDto } from '../../dtos/add-streak.dto';
+import { RegisterDailyReadDto } from '../../dtos/register-daily-read.dto';
 import {
   makePostRepository,
   makeStreakRepository,
@@ -7,7 +7,6 @@ import {
   StreakRepository,
   UserRepository,
 } from '../../repositories';
-import * as dayjs from 'dayjs';
 
 export class RegisterDailyReadUseCase {
   constructor(
@@ -16,7 +15,7 @@ export class RegisterDailyReadUseCase {
     private readonly streakRepository: StreakRepository,
   ) {}
 
-  async execute(read: RegisterReadDto) {
+  async execute(read: RegisterDailyReadDto) {
     const userExists = await this.userRepository.getUserByEmail(read.email);
     const postExists = await this.postRepository.getPostByBeehivId(read.postId);
 
