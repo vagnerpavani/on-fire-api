@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { db } from 'src/config/db';
+import { db } from 'src/config';
 import { Read } from '../entities';
 
 export class StreakRepository {

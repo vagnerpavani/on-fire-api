@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
-import { db } from 'src/config/db';
+import { db } from 'src/config';
+
 import { User } from 'src/modules/streak/entities';
 
 export class UserRepository {
