@@ -9,3 +9,9 @@ export class DailyReadAlreadyExistException extends Error {
     super('Current daily read already registered');
   }
 }
+
+export class UserNotFoundException extends Error {
+  constructor() {
+    super('Current user was not found!');
+  }
+}
