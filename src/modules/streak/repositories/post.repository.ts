@@ -46,6 +46,31 @@ export class PostRepository {
       row.updatedAt,
     );
   }
+
+  async GetPostsFromUserOrderByMostRecent(userId: string) {
+    const result = await this.database.query(
+      `SELECT posts.* FROM posts
+      JOIN reads ON reads."postId" = posts."id"
+      WHERE reads."userId" = $1
+      ORDER BY reads."createdAt" DESC;`,
+      [userId],
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return result.rows.map((row) => {
+      return new Post(
+        row.id,
+        row.title,
+        row.publishedAt,
+        row.beehivId,
+        row.createdAt,
+        row.updatedAt,
+      );
+    });
+  }
 }
 
 export const makePostRepository = () => {
