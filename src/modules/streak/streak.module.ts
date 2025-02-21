@@ -1,15 +1,18 @@
 import { Module } from '@nestjs/common';
 import {
   GetCurrentStreakUseCase,
+  GetUserHistoryUseCase,
   makeGetCurrentStreakUseCase,
+  makeGetUserHistoryUseCase,
   makeRegisterDailyReadUseCase,
   RegisterDailyReadUseCase,
 } from './use-cases';
 import { StreakController } from './streak.controller';
+import { UserController } from './user.controller';
 
 @Module({
   imports: [],
-  controllers: [StreakController],
+  controllers: [StreakController, UserController],
   providers: [
     {
       provide: RegisterDailyReadUseCase,
@@ -18,6 +21,10 @@ import { StreakController } from './streak.controller';
     {
       provide: GetCurrentStreakUseCase,
       useFactory: makeGetCurrentStreakUseCase,
+    },
+    {
+      provide: GetUserHistoryUseCase,
+      useFactory: makeGetUserHistoryUseCase,
     },
   ],
 })
