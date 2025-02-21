@@ -46,6 +46,29 @@ export class UserRepository {
       row.updatedAt,
     );
   }
+
+  async updateUser(user: User): Promise<User | null> {
+    const result = await this.database.query(
+      `UPDATE users SET 
+      email = $1, "recordStreak" = $2, "updatedAt" = $3 
+      WHERE id = $4
+      RETURNING *;`,
+      [user.email, user.recordStreak, new Date().toISOString(), user.id],
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0];
+    return new User(
+      row.id,
+      row.email,
+      row.recordStreak,
+      row.createdAt,
+      row.updatedAt,
+    );
+  }
 }
 
 export const makeUserRepository = () => {
