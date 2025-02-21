@@ -1,15 +1,20 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   InternalServerErrorException,
+  NotFoundException,
+  Param,
   Post,
   Res,
 } from '@nestjs/common';
 import {
   DailyReadAlreadyExistException,
+  GetCurrentStreakUseCase,
   NotTodayPostException,
   RegisterDailyReadUseCase,
+  UserNotFoundException,
 } from './use-cases';
 import { RegisterDailyReadDto } from './dtos';
 import { Response } from 'express';
@@ -18,6 +23,7 @@ import { Response } from 'express';
 export class StreakController {
   constructor(
     private readonly registerDailyReadUseCase: RegisterDailyReadUseCase,
+    private readonly getCurrentStreakUseCase: GetCurrentStreakUseCase,
   ) {}
 
   @Post()
@@ -40,6 +46,17 @@ export class StreakController {
       console.log(err);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR);
       return;
+    }
+  }
+
+  @Get(':userId')
+  async getCurrentStreak(@Param() params: { userId: string }) {
+    try {
+      return await this.getCurrentStreakUseCase.execute(params.userId);
+    } catch (err) {
+      if (err instanceof UserNotFoundException) throw new NotFoundException();
+      console.log('LOGANDO', err);
+      throw new InternalServerErrorException();
     }
   }
 }
