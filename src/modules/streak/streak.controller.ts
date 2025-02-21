@@ -29,15 +29,17 @@ export class StreakController {
       await this.registerDailyReadUseCase.execute(body);
       return;
     } catch (err) {
-      if (
-        err instanceof NotTodayPostException ||
-        err instanceof DailyReadAlreadyExistException
-      ) {
+      if (err instanceof DailyReadAlreadyExistException) {
         res.status(HttpStatus.OK);
         return;
       }
+      if (err instanceof NotTodayPostException) {
+        res.status(HttpStatus.FORBIDDEN);
+        return;
+      }
       console.log(err);
-      return new InternalServerErrorException();
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+      return;
     }
   }
 }
