@@ -55,7 +55,7 @@ export class StreakController {
       return await this.getCurrentStreakUseCase.execute(params.userId);
     } catch (err) {
       if (err instanceof UserNotFoundException) throw new NotFoundException();
-      console.log('LOGANDO', err);
+      console.log(err);
       throw new InternalServerErrorException();
     }
   }

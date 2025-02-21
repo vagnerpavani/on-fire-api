@@ -2,11 +2,12 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
 import TestAgent from 'supertest/lib/agent';
-import { UserRepository } from './repositories';
+import { StreakRepository, UserRepository } from './repositories';
 import {
   cleanDatabase,
   createFakePost,
   createFakeRead,
+  createFakeStreak,
   createFakeUser,
 } from '__tests__/db';
 import { createApp } from 'src/app';
@@ -136,6 +137,59 @@ describe('POST /streak', () => {
       body.email = user.email;
       body.postId = post.beehivId;
       const res = await server.post(path).send(body);
+
+      expect(res.status).toBe(HttpStatus.OK);
+    });
+  });
+});
+
+describe('GET /streak/:id', () => {
+  const path = '/streak';
+
+  describe('error cases', () => {
+    it(`should respond with status ${HttpStatus.NOT_FOUND} when the user does not exist`, async () => {
+      const res = await server.get(path + '/1').send();
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+
+    it(`should respond with status ${HttpStatus.INTERNAL_SERVER_ERROR} when an unexpected error occours`, async () => {
+      const spy = jest.spyOn(
+        StreakRepository.prototype,
+        'getReadsFromUserOrderByCreationDesc',
+      );
+      spy.mockImplementationOnce(() => {
+        throw Error('DATABASE ERROR MOCK');
+      });
+
+      const res = await server.get(path + '/1').send();
+
+      expect(res.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+  });
+
+  describe('success cases', () => {
+    it(`should respond with status ${HttpStatus.OK} when an valid user Id is sent`, async () => {
+      const userWithStreak = await createFakeStreak();
+      const res = await server.get(path + `/${userWithStreak.id}`).send();
+
+      expect(res.status).toBe(HttpStatus.OK);
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          currentStreak: 3,
+          user: expect.objectContaining({
+            id: 1,
+            recordStreak: 4,
+          }),
+        }),
+      );
+    });
+
+    it(`should respond with status ${HttpStatus.OK} when an valid user Id is sent but has no streak`, async () => {
+      const user = await createFakeUser();
+      const post = await createFakePost();
+      await createFakeRead({ user, post });
+      const res = await server.get(path + `/${user.id}`).send();
 
       expect(res.status).toBe(HttpStatus.OK);
     });
