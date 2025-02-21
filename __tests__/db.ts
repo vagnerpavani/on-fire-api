@@ -94,3 +94,45 @@ export const createFakeRead = async (
     row.updatedAt,
   );
 };
+
+export const createFakeStreak = async () => {
+  try {
+    await db.query('BEGIN');
+
+    const userResult =
+      await db.query(`INSERT INTO users ("email", "recordStreak") 
+    VALUES ('teste@email.com', 4) RETURNING *`);
+
+    await db.query(`INSERT INTO posts ("beehivId", title, "publishedAt") 
+    VALUES ('post_00-00-01','title',Now()) RETURNING *;`);
+
+    await db.query(`INSERT INTO posts ("beehivId", title, "publishedAt") 
+    VALUES ('post_00-00-02','title',Now()) RETURNING *;`);
+
+    await db.query(`INSERT INTO posts ("beehivId", title, "publishedAt") 
+    VALUES ('post_00-00-03','title',Now()) RETURNING *;`);
+
+    await db.query(`INSERT INTO reads ("userId","postId","createdAt") 
+    VALUES (1,1, '2025-02-19T17:29:14.809Z') RETURNING *;`);
+
+    await db.query(`INSERT INTO reads ("userId","postId","createdAt") 
+    VALUES (1,2, '2025-02-20T17:29:14.809Z') RETURNING *;`);
+
+    await db.query(`INSERT INTO reads ("userId","postId","createdAt") 
+    VALUES (1,3, '2025-02-21T17:29:14.809Z') RETURNING *;`);
+
+    await db.query('COMMIT');
+
+    const row = userResult.rows[0];
+    return new User(
+      row.id,
+      row.email,
+      row.recordStreak,
+      row.createdAt,
+      row.updatedAt,
+    );
+  } catch (err) {
+    await db.query('ROLLBACK');
+    throw new Error(`DATABASE ERROR: ${err}`);
+  }
+};
