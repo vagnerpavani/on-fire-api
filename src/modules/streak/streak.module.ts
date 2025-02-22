@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import {
   GetCurrentStreakUseCase,
+  GetStreakStatsUseCase,
   GetUserHistoryUseCase,
+  GetUserUseCase,
   makeGetCurrentStreakUseCase,
+  makeGetStreakStatsUseCase,
   makeGetUserHistoryUseCase,
+  makeGetUserUseCase,
   makeRegisterDailyReadUseCase,
   RegisterDailyReadUseCase,
 } from './use-cases';
@@ -25,6 +29,14 @@ import { UserController } from './user.controller';
     {
       provide: GetUserHistoryUseCase,
       useFactory: makeGetUserHistoryUseCase,
+    },
+    {
+      provide: GetUserUseCase,
+      useFactory: makeGetUserUseCase,
+    },
+    {
+      provide: GetStreakStatsUseCase,
+      useFactory: makeGetStreakStatsUseCase,
     },
   ],
 })
