@@ -21,6 +21,7 @@ export class UserRepository {
       row.id,
       row.email,
       row.recordStreak,
+      row.currentStreak,
       row.createdAt,
       row.updatedAt,
     );
@@ -41,6 +42,7 @@ export class UserRepository {
       row.id,
       row.email,
       row.recordStreak,
+      row.currentStreak,
       row.createdAt,
       row.updatedAt,
     );
@@ -62,6 +64,7 @@ export class UserRepository {
       row.id,
       row.email,
       row.recordStreak,
+      row.currentStreak,
       row.createdAt,
       row.updatedAt,
     );
@@ -70,8 +73,8 @@ export class UserRepository {
   async updateUser(user: User): Promise<User | null> {
     const result = await this.database.query(
       `UPDATE users SET 
-      email = $1, "recordStreak" = $2, "updatedAt" = $3 
-      WHERE id = $4
+      email = $1, "recordStreak" = $2, "currentStreak" = $3, "updatedAt" = $4
+      WHERE id = $5
       RETURNING *;`,
       [user.email, user.recordStreak, new Date().toISOString(), user.id],
     );
@@ -85,6 +88,7 @@ export class UserRepository {
       row.id,
       row.email,
       row.recordStreak,
+      row.currentStreak,
       row.createdAt,
       row.updatedAt,
     );

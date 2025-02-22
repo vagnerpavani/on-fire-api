@@ -2,6 +2,7 @@ CREATE TABLE users (
 	id SERIAL PRIMARY KEY,
 	email TEXT UNIQUE,
 	"recordStreak" INTEGER DEFAULT 0,
+	"currentStreak" INTEGER DEFAULT 0,
 	"createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
 	"updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()
 );
