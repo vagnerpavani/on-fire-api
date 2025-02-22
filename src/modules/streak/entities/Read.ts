@@ -10,8 +10,8 @@ export class Read {
     public utmMedium: string | null,
     public utmCampaign: string | null,
     public utmChannel: string | null,
-    public readonly createdAt: string,
-    public updatedAt: string,
+    public readonly createdAt?: string,
+    public updatedAt?: string,
   ) {}
 
   users?: User[];

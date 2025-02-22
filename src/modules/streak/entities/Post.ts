@@ -1,3 +1,4 @@
+import { Read } from './Read';
 import { User } from './User';
 
 export class Post {
@@ -6,9 +7,10 @@ export class Post {
     public title: string,
     public publishedAt: string,
     public beehivId: string,
-    public readonly createdAt: string,
-    public updatedAt: string,
+    public readonly createdAt?: string,
+    public updatedAt?: string,
   ) {}
 
   users?: User[];
+  reads?: Read[];
 }

@@ -5,8 +5,9 @@ export class User {
     public readonly id: string,
     public email: string,
     public recordStreak: number,
-    public readonly createdAt: string,
-    public updatedAt: string,
+    public currentStreak: number,
+    public readonly createdAt?: string,
+    public updatedAt?: string,
   ) {}
 
   posts?: Post[];
