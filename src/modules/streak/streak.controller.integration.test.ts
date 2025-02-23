@@ -143,8 +143,8 @@ describe('POST /streak', () => {
   });
 });
 
-describe('GET /streak/:id', () => {
-  const path = '/streak';
+describe('GET /streak/user/:userId', () => {
+  const path = '/streak/user';
 
   describe('error cases', () => {
     it(`should respond with status ${HttpStatus.NOT_FOUND} when the user does not exist`, async () => {
