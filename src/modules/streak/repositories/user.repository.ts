@@ -104,6 +104,29 @@ export class UserRepository {
     const row = result.rows[0];
     return row.count;
   }
+
+  async getUserRanking(
+    rank: 'currentStreak' | 'recordStreak',
+  ): Promise<User[]> {
+    const result = await this.database.query(
+      `SELECT * FROM users ORDER BY "${rank}" DESC`,
+    );
+
+    if (result.rows.length === 0) {
+      return [];
+    }
+
+    return result.rows.map((row) => {
+      return new User(
+        row.id,
+        row.email,
+        row.recordStreak,
+        row.currentStreak,
+        row.createdAt,
+        row.updatedAt,
+      );
+    });
+  }
 }
 
 export const makeUserRepository = () => {
