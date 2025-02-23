@@ -12,6 +12,7 @@ import {
 import {
   DailyReadAlreadyExistException,
   GetCurrentStreakUseCase,
+  GetStreakRankingUseCase,
   GetStreakStatsUseCase,
   NotTodayPostException,
   RegisterDailyReadUseCase,
@@ -26,6 +27,7 @@ export class StreakController {
     private readonly registerDailyReadUseCase: RegisterDailyReadUseCase,
     private readonly getCurrentStreakUseCase: GetCurrentStreakUseCase,
     private readonly getStreakStatsUseCase: GetStreakStatsUseCase,
+    private readonly getStreakRankingUseCase: GetStreakRankingUseCase,
   ) {}
 
   @Post()
@@ -73,7 +75,18 @@ export class StreakController {
         params.postId,
       );
     } catch (err) {
-      if (err instanceof UserNotFoundException) throw new NotFoundException();
+      console.log(err);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  @Get('ranking')
+  async getStreakRanking(
+    @Param() params: { startAt: string; endAt: string; postId: string },
+  ) {
+    try {
+      return await this.getStreakRankingUseCase.execute();
+    } catch (err) {
       console.log(err);
       throw new InternalServerErrorException();
     }
