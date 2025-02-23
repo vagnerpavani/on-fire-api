@@ -4,6 +4,7 @@ import {
   StreakRepository,
   UserRepository,
 } from '../../repositories';
+import { StreakStatus } from '../protocols';
 
 export class GetStreakStatsUseCase {
   constructor(
@@ -11,11 +12,17 @@ export class GetStreakStatsUseCase {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async execute(startAt?: string, endAt?: string, postId?: string) {
+  async execute(
+    startAt?: string,
+    endAt?: string,
+    postId?: string,
+    streakStatus?: StreakStatus,
+  ) {
     const posts = await this.streakRepository.getAllReadsWithUserAndPost(
       startAt,
       endAt,
       postId,
+      streakStatus,
     );
 
     const totalUsers = await this.userRepository.getTotalUsers();

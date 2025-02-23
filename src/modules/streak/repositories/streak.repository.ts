@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { db } from 'src/config';
 import { Post, Read, User } from '../entities';
+import { STREAK_STATUS } from '../constants';
 
 export class StreakRepository {
   constructor(private readonly database: Pool) {}
@@ -91,6 +92,7 @@ export class StreakRepository {
     startAt?: string,
     endAt?: string,
     postId?: string,
+    streakStatus?: string,
   ) {
     const filters = [];
     if (startAt) filters.push(startAt);
@@ -135,15 +137,6 @@ export class StreakRepository {
 
       const post = postsMap.get(row.postId)!;
 
-      if (row.userId && !post.users.some((user) => user.id === row.userId)) {
-        post.users.push({
-          id: row.userId,
-          email: row.userEmail,
-          currentStreak: row.userCurrentStreak,
-          recordStreak: row.userRecordStreak,
-        });
-      }
-
       if (row.id && !post.reads.some((read) => read.id === row.id)) {
         post.reads.push({
           id: row.id,
@@ -155,6 +148,23 @@ export class StreakRepository {
           utmChannel: row.utmChannel,
           createdAt: row.created_at,
           updatedAt: row.updatedAt,
+        });
+      }
+
+      if (row.userId && !post.users.some((user) => user.id === row.userId)) {
+        if (streakStatus === STREAK_STATUS.STREAK && row.userCurrentStreak <= 1)
+          return;
+        if (
+          streakStatus === STREAK_STATUS.NO_STREAK &&
+          row.userCurrentStreak >= 1
+        )
+          return;
+
+        post.users.push({
+          id: row.userId,
+          email: row.userEmail,
+          currentStreak: row.userCurrentStreak,
+          recordStreak: row.userRecordStreak,
         });
       }
     });

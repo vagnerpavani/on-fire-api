@@ -16,10 +16,12 @@ import {
   GetStreakStatsUseCase,
   NotTodayPostException,
   RegisterDailyReadUseCase,
+  StreakStatus,
   UserNotFoundException,
 } from './use-cases';
 import { RegisterDailyReadDto } from './dtos';
 import { Response } from 'express';
+import { STREAK_STATUS } from './constants';
 
 @Controller('streak')
 export class StreakController {
@@ -66,13 +68,28 @@ export class StreakController {
 
   @Get('stats')
   async getStreakStats(
-    @Param() params: { startAt: string; endAt: string; postId: string },
+    @Param()
+    params: {
+      startAt: string;
+      endAt: string;
+      postId: string;
+      streakStatus: string;
+    },
   ) {
     try {
+      const streakStatuses = {
+        streak: STREAK_STATUS.STREAK,
+        noStreak: STREAK_STATUS.NO_STREAK,
+      };
+      const streakStatus: StreakStatus = streakStatuses[params.streakStatus]
+        ? streakStatuses[params.streakStatus]
+        : null;
+
       return await this.getStreakStatsUseCase.execute(
         params.startAt,
         params.endAt,
         params.postId,
+        streakStatus,
       );
     } catch (err) {
       console.log(err);

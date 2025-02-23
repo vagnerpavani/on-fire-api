@@ -15,3 +15,5 @@ export class UserNotFoundException extends Error {
     super('Current user was not found!');
   }
 }
+
+export type StreakStatus = 'streak' | 'no streak' | null;
