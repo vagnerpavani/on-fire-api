@@ -171,6 +171,22 @@ export class StreakRepository {
 
     return Array.from(postsMap.values());
   }
+
+  async resetStreak(postId: string) {
+    const result = await this.database.query(
+      `
+      UPDATE users 
+      SET "updatedAt" = NOW(),
+      "currentStreak" = 0
+      WHERE NOT EXISTS (
+      SELECT 1 
+      FROM reads 
+      WHERE reads."userId" = users."id" 
+      AND reads."postId" = $1
+    );`,
+      [postId],
+    );
+  }
 }
 
 export const makeStreakRepository = () => {
