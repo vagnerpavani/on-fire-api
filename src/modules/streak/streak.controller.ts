@@ -15,8 +15,10 @@ import {
   GetStreakRankingUseCase,
   GetStreakStatsUseCase,
   NotTodayPostException,
+  PostNotFoundException,
   RegisterDailyReadUseCase,
   StreakStatus,
+  UpdateStreakLossUseCase,
   UserNotFoundException,
 } from './use-cases';
 import { RegisterDailyReadDto } from './dtos';
@@ -30,6 +32,7 @@ export class StreakController {
     private readonly getCurrentStreakUseCase: GetCurrentStreakUseCase,
     private readonly getStreakStatsUseCase: GetStreakStatsUseCase,
     private readonly getStreakRankingUseCase: GetStreakRankingUseCase,
+    private readonly updateStreakLossUseCase: UpdateStreakLossUseCase,
   ) {}
 
   @Post()
@@ -117,6 +120,19 @@ export class StreakController {
         : null;
       return await this.getStreakRankingUseCase.execute();
     } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException();
+    }
+  }
+
+  @Post('job/update-streaks')
+  async updateStreaks() {
+    try {
+      return await this.updateStreakLossUseCase.execute();
+    } catch (err) {
+      if (err instanceof PostNotFoundException) {
+        throw new NotFoundException('Post not found!');
+      }
       console.log(err);
       throw new InternalServerErrorException();
     }

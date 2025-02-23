@@ -11,7 +11,9 @@ import {
   makeGetUserHistoryUseCase,
   makeGetUserUseCase,
   makeRegisterDailyReadUseCase,
+  makeUpdateStreakLossUseCase,
   RegisterDailyReadUseCase,
+  UpdateStreakLossUseCase,
 } from './use-cases';
 import { StreakController } from './streak.controller';
 import { UserController } from './user.controller';
@@ -43,6 +45,10 @@ import { UserController } from './user.controller';
     {
       provide: GetStreakRankingUseCase,
       useFactory: makeGetStreakRankingUseCase,
+    },
+    {
+      provide: UpdateStreakLossUseCase,
+      useFactory: makeUpdateStreakLossUseCase,
     },
   ],
 })
