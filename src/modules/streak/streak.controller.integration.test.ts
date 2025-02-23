@@ -224,7 +224,6 @@ describe('GET /streak/stats', () => {
       await createFakeStreak();
 
       const res = await server.get(path).send();
-      console.log(res.body);
 
       expect(res.body).toEqual(
         expect.objectContaining({
@@ -275,7 +274,6 @@ describe('GET /streak/stats', () => {
     await createFakeStreak();
 
     const res = await server.get(path + '?postId=1').send();
-    console.log(res.body);
 
     expect(res.body).toEqual(
       expect.objectContaining({
@@ -315,6 +313,83 @@ describe('GET /streak/stats', () => {
             streakLoss: expect.any(Number),
           }),
         ]),
+      }),
+    );
+
+    expect(res.status).toBe(HttpStatus.OK);
+  });
+});
+
+describe('GET /streak/ranking', () => {
+  const path = '/streak/ranking';
+
+  describe('error cases', () => {
+    it(`should respond with status ${HttpStatus.INTERNAL_SERVER_ERROR} when an unexpected error occours`, async () => {
+      const spy = jest.spyOn(UserRepository.prototype, 'getUserRanking');
+      spy.mockImplementationOnce(() => {
+        throw Error('DATABASE ERROR MOCK');
+      });
+
+      const res = await server.get(path).send();
+
+      expect(res.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+  });
+
+  describe('success cases', () => {
+    it(`should respond with status ${HttpStatus.OK} and the ranking`, async () => {
+      await createFakePost();
+      await createFakePost();
+      await createFakeRead();
+      await createFakeStreak();
+      await createFakeStreak();
+
+      const res = await server.get(path).send();
+
+      const userRankMatcher = expect.objectContaining({
+        position: expect.any(Number),
+        id: expect.any(Number),
+        email: expect.any(String),
+        recordStreak: expect.any(Number),
+        currentStreak: expect.any(Number),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      });
+
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          currentStreakRanking: expect.arrayContaining([userRankMatcher]),
+          recordStreakRanking: expect.arrayContaining([userRankMatcher]),
+        }),
+      );
+
+      expect(res.status).toBe(HttpStatus.OK);
+    });
+  });
+
+  it(`should respond with status ${HttpStatus.OK} and the ranking when passing filter params`, async () => {
+    await createFakePost();
+    await createFakePost();
+    await createFakeRead();
+    await createFakeStreak();
+    await createFakeStreak();
+
+    const res = await server.get(path + '?postId=1').send();
+
+    const userRankMatcher = expect.objectContaining({
+      position: expect.any(Number),
+      id: expect.any(Number),
+      email: expect.any(String),
+      recordStreak: expect.any(Number),
+      currentStreak: expect.any(Number),
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    });
+
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        currentStreakRanking: expect.arrayContaining([userRankMatcher]),
+        recordStreakRanking: expect.arrayContaining([userRankMatcher]),
       }),
     );
 
