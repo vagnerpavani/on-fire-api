@@ -63,6 +63,7 @@ export class GetStreakStatsUseCase {
     });
 
     return {
+      posts,
       totalUsers,
       peopleWithStreak,
       postRecords,
