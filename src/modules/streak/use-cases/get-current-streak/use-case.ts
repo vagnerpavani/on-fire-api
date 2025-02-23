@@ -44,9 +44,10 @@ export class GetCurrentStreakUseCase {
       index++;
     } while (index < reads.length);
 
-    if (currentStreak <= user.recordStreak) return { currentStreak, user };
+    user.recordStreak =
+      currentStreak <= user.recordStreak ? user.recordStreak : currentStreak;
 
-    user.recordStreak = currentStreak;
+    user.currentStreak = currentStreak;
     await this.userRepository.updateUser(user);
     return { currentStreak, user };
   }

@@ -76,7 +76,13 @@ export class UserRepository {
       email = $1, "recordStreak" = $2, "currentStreak" = $3, "updatedAt" = $4
       WHERE id = $5
       RETURNING *;`,
-      [user.email, user.recordStreak, new Date().toISOString(), user.id],
+      [
+        user.email,
+        user.recordStreak,
+        user.currentStreak,
+        new Date().toISOString(),
+        user.id,
+      ],
     );
 
     if (result.rows.length === 0) {
