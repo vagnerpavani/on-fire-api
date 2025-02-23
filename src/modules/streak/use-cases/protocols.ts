@@ -16,4 +16,10 @@ export class UserNotFoundException extends Error {
   }
 }
 
+export class PostNotFoundException extends Error {
+  constructor() {
+    super('Current post was not found!');
+  }
+}
+
 export type StreakStatus = 'streak' | 'no streak' | null;
