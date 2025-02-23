@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { db } from 'src/config';
-import { Read, User } from '../entities';
+import { Post, Read, User } from '../entities';
 
 export class StreakRepository {
   constructor(private readonly database: Pool) {}
@@ -85,6 +85,67 @@ export class StreakRepository {
     });
 
     return { user, reads };
+  }
+
+  async getAllReadsWithUserAndPost() {
+    const result = await this.database.query(
+      `SELECT 
+      reads.*,
+      posts.id AS "postId", 
+      posts.title AS "postTitle", 
+      posts."publishedAt" AS "postPublishedAt",
+      posts."beehivId" AS "postBeehivId",
+      users.id AS "userId", 
+      users.email AS "userEmail",
+      users."recordStreak" AS "userRecordStreak",
+      users."currentStreak" AS "userCurrentStreak"
+      FROM reads
+      JOIN users ON reads."userId" = users.id
+      JOIN posts ON reads."postId" = posts.id
+      ORDER BY posts.id, users.id;`,
+    );
+
+    const postsMap = new Map<string, Partial<Post>>();
+
+    result.rows.forEach((row) => {
+      if (!postsMap.has(row.postId)) {
+        postsMap.set(row.postId, {
+          id: row.postId,
+          title: row.postTitle,
+          publishedAt: row.postPublishedAt,
+          beehivId: row.postBeehivId,
+          users: [],
+          reads: [],
+        });
+      }
+
+      const post = postsMap.get(row.postId)!;
+
+      if (row.userId && !post.users.some((user) => user.id === row.userId)) {
+        post.users.push({
+          id: row.userId,
+          email: row.userEmail,
+          currentStreak: row.userCurrentStreak,
+          recordStreak: row.userRecordStreak,
+        });
+      }
+
+      if (row.id && !post.reads.some((read) => read.id === row.id)) {
+        post.reads.push({
+          id: row.id,
+          userId: row.userId,
+          postId: row.postId,
+          utmSource: row.utmSource,
+          utmMedium: row.utmMedium,
+          utmCampaign: row.utmCampaign,
+          utmChannel: row.utmChannel,
+          createdAt: row.created_at,
+          updatedAt: row.updatedAt,
+        });
+      }
+    });
+
+    return Array.from(postsMap.values());
   }
 }
 
