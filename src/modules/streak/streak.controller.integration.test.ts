@@ -2,7 +2,11 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 
 import TestAgent from 'supertest/lib/agent';
-import { StreakRepository, UserRepository } from './repositories';
+import {
+  PostRepository,
+  StreakRepository,
+  UserRepository,
+} from './repositories';
 import {
   cleanDatabase,
   createFakePost,
@@ -13,6 +17,7 @@ import {
 import { createApp } from 'src/app';
 import { faker } from '@faker-js/faker/.';
 import * as dayjs from 'dayjs';
+import { db } from 'src/config';
 
 let server: TestAgent = null;
 let app: INestApplication;
@@ -394,5 +399,46 @@ describe('GET /streak/ranking', () => {
     );
 
     expect(res.status).toBe(HttpStatus.OK);
+  });
+});
+
+describe('POST /streak/job/update-streaks', () => {
+  const path = '/streak/job/update-streaks';
+
+  describe('error cases', () => {
+    it(`should respond with status ${HttpStatus.INTERNAL_SERVER_ERROR} when an unexpected error occours`, async () => {
+      const spy = jest.spyOn(
+        PostRepository.prototype,
+        'getPostByPublishDateRange',
+      );
+      spy.mockImplementationOnce(() => {
+        throw Error('DATABASE ERROR MOCK');
+      });
+
+      const res = await server.post(path).send();
+
+      expect(res.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+
+    it(`should respond with status ${HttpStatus.NOT_FOUND} when the daily post dos not exist`, async () => {
+      const res = await server.post(path).send();
+
+      expect(res.status).toBe(HttpStatus.NOT_FOUND);
+    });
+  });
+
+  describe('success cases', () => {
+    it(`should respond with status ${HttpStatus.CREATED} and the ranking`, async () => {
+      await createFakePost();
+      const user = await createFakeUser({ currentStreak: 10 });
+
+      const res = await server.post(path).send();
+
+      const userResult = await db.query('SELECT * FROM users WHERE id=$1', [
+        user.id,
+      ]);
+      expect(userResult.rows[0].currentStreak).toBe(0);
+      expect(res.status).toBe(HttpStatus.CREATED);
+    });
   });
 });
