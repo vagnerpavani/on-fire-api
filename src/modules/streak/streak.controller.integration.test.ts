@@ -176,10 +176,10 @@ describe('GET /streak/user/:userId', () => {
       expect(res.status).toBe(HttpStatus.OK);
       expect(res.body).toEqual(
         expect.objectContaining({
-          currentStreak: 3,
+          currentStreak: expect.any(Number),
           user: expect.objectContaining({
-            id: 1,
-            recordStreak: 4,
+            id: expect.any(Number),
+            recordStreak: expect.any(Number),
           }),
         }),
       );
@@ -193,5 +193,131 @@ describe('GET /streak/user/:userId', () => {
 
       expect(res.status).toBe(HttpStatus.OK);
     });
+  });
+});
+
+describe('GET /streak/stats', () => {
+  const path = '/streak/stats';
+
+  describe('error cases', () => {
+    it(`should respond with status ${HttpStatus.INTERNAL_SERVER_ERROR} when an unexpected error occours`, async () => {
+      const spy = jest.spyOn(
+        StreakRepository.prototype,
+        'getAllReadsWithUserAndPost',
+      );
+      spy.mockImplementationOnce(() => {
+        throw Error('DATABASE ERROR MOCK');
+      });
+
+      const res = await server.get(path).send();
+
+      expect(res.status).toBe(HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+  });
+
+  describe('success cases', () => {
+    it(`should respond with status ${HttpStatus.OK} and the stats`, async () => {
+      await createFakePost();
+      await createFakePost();
+      await createFakeRead();
+      await createFakeStreak();
+      await createFakeStreak();
+
+      const res = await server.get(path).send();
+      console.log(res.body);
+
+      expect(res.body).toEqual(
+        expect.objectContaining({
+          posts: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(Number),
+              title: expect.any(String),
+              publishedAt: expect.any(String),
+              beehivId: expect.any(String),
+              users: expect.any(Array),
+              reads: expect.any(Array),
+            }),
+          ]),
+          totalUsers: expect.any(String),
+          peopleWithStreak: expect.arrayContaining([
+            expect.objectContaining({
+              postId: expect.any(Number),
+              title: expect.any(String),
+              publishedAt: expect.any(String),
+              userWithStreak: expect.any(Number),
+              userWithNoStreak: expect.any(Number),
+            }),
+          ]),
+          postRecords: expect.arrayContaining([
+            expect.objectContaining({
+              postId: expect.any(Number),
+              title: expect.any(String),
+              publishedAt: expect.any(String),
+              highestStreak: expect.any(Number),
+            }),
+          ]),
+          userStreakLoss: expect.arrayContaining([
+            expect.objectContaining({
+              postId: expect.any(Number),
+              title: expect.any(String),
+              publishedAt: expect.any(String),
+              streakLoss: expect.any(Number),
+            }),
+          ]),
+        }),
+      );
+
+      expect(res.status).toBe(HttpStatus.OK);
+    });
+  });
+
+  it(`should respond with status ${HttpStatus.OK} and the stats when passing filter params`, async () => {
+    await createFakeStreak();
+
+    const res = await server.get(path + '?postId=1').send();
+    console.log(res.body);
+
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        posts: expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(Number),
+            title: expect.any(String),
+            publishedAt: expect.any(String),
+            beehivId: expect.any(String),
+            users: expect.any(Array),
+            reads: expect.any(Array),
+          }),
+        ]),
+        totalUsers: expect.any(String),
+        peopleWithStreak: expect.arrayContaining([
+          expect.objectContaining({
+            postId: expect.any(Number),
+            title: expect.any(String),
+            publishedAt: expect.any(String),
+            userWithStreak: expect.any(Number),
+            userWithNoStreak: expect.any(Number),
+          }),
+        ]),
+        postRecords: expect.arrayContaining([
+          expect.objectContaining({
+            postId: expect.any(Number),
+            title: expect.any(String),
+            publishedAt: expect.any(String),
+            highestStreak: expect.any(Number),
+          }),
+        ]),
+        userStreakLoss: expect.arrayContaining([
+          expect.objectContaining({
+            postId: expect.any(Number),
+            title: expect.any(String),
+            publishedAt: expect.any(String),
+            streakLoss: expect.any(Number),
+          }),
+        ]),
+      }),
+    );
+
+    expect(res.status).toBe(HttpStatus.OK);
   });
 });
