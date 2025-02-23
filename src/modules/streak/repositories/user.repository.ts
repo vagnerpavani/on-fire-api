@@ -113,10 +113,37 @@ export class UserRepository {
 
   async getUserRanking(
     rank: 'currentStreak' | 'recordStreak',
+    postId: string,
+    startAt: string,
+    endAt,
   ): Promise<User[]> {
-    const result = await this.database.query(
-      `SELECT * FROM users ORDER BY "${rank}" DESC`,
-    );
+    const filters = [];
+    if (postId) filters.push(postId);
+    if (startAt) filters.push(startAt);
+    if (endAt) filters.push(endAt);
+
+    const result = postId
+      ? await this.database.query(
+          `SELECT users.* FROM reads
+          JOIN users ON reads."userId" = users.id
+          WHERE 
+          reads."postId" = $1
+          ${startAt || endAt ? 'AND' : ''}
+          ${startAt && !endAt ? `reads."createdAt" >= $2` : ''}
+          ${!startAt && endAt ? `reads."createdAt" <= $2` : ''}
+          ${startAt && endAt ? 'reads."createdAt" BETWEEN $2 AND $3' : ''}
+          ORDER BY "${rank}" DESC`,
+          filters,
+        )
+      : await this.database.query(
+          `SELECT * FROM users 
+          ${startAt || endAt ? 'WHERE' : ''}
+          ${startAt && !endAt ? `reads."createdAt" >= $1` : ''}
+          ${!startAt && endAt ? `reads."createdAt" <= $1` : ''}
+          ${startAt && endAt ? 'reads."createdAt" BETWEEN $1 AND $2' : ''}
+          ORDER BY "${rank}" DESC`,
+          filters,
+        );
 
     if (result.rows.length === 0) {
       return [];

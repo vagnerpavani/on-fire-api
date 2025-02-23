@@ -99,9 +99,22 @@ export class StreakController {
 
   @Get('ranking')
   async getStreakRanking(
-    @Param() params: { startAt: string; endAt: string; postId: string },
+    @Param()
+    params: {
+      startAt: string;
+      endAt: string;
+      postId: string;
+      streakStatus: string;
+    },
   ) {
     try {
+      const streakStatuses = {
+        streak: STREAK_STATUS.STREAK,
+        noStreak: STREAK_STATUS.NO_STREAK,
+      };
+      const streakStatus: StreakStatus = streakStatuses[params.streakStatus]
+        ? streakStatuses[params.streakStatus]
+        : null;
       return await this.getStreakRankingUseCase.execute();
     } catch (err) {
       console.log(err);
