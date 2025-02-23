@@ -87,10 +87,17 @@ export class StreakRepository {
     return { user, reads };
   }
 
-  async getAllReadsWithUserAndPost() {
-    const result = await this.database.query(
-      `SELECT 
-      reads.*,
+  async getAllReadsWithUserAndPost(
+    startAt?: string,
+    endAt?: string,
+    postId?: string,
+  ) {
+    const filters = [];
+    if (startAt) filters.push(startAt);
+    if (endAt) filters.push(endAt);
+    if (postId) filters.push(postId);
+
+    const filterQuery = `SELECT reads.*,
       posts.id AS "postId", 
       posts.title AS "postTitle", 
       posts."publishedAt" AS "postPublishedAt",
@@ -102,8 +109,15 @@ export class StreakRepository {
       FROM reads
       JOIN users ON reads."userId" = users.id
       JOIN posts ON reads."postId" = posts.id
-      ORDER BY posts.id, users.id;`,
-    );
+      ${postId || startAt || endAt ? 'WHERE' : ''}
+      ${postId ? `reads."postId" = $${filters.length}` : ''}
+      ${(postId && startAt) || (postId && endAt) ? 'AND' : ''}
+      ${startAt && !endAt ? `reads."createdAt" >= $1` : ''}
+      ${!startAt && endAt ? `reads."createdAt" <= $1` : ''}
+      ${startAt && endAt ? 'reads."createdAt" BETWEEN $1 AND $2' : ''}
+      ORDER BY posts.id, users.id;`;
+
+    const result = await this.database.query(filterQuery, filters);
 
     const postsMap = new Map<string, Partial<Post>>();
 
