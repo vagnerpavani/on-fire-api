@@ -26,6 +26,30 @@ export class PostRepository {
     );
   }
 
+  async getPostByPublishDateRange(
+    startAt: string,
+    endAt: string,
+  ): Promise<Post | null> {
+    const result = await this.database.query(
+      `SELECT * FROM posts WHERE "publishedAt" BETWEEN $1 AND $2`,
+      [startAt, endAt],
+    );
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0];
+    return new Post(
+      row.id,
+      row.title,
+      row.publishedAt,
+      row.beeHivId,
+      row.createdAt,
+      row.updatedAt,
+    );
+  }
+
   async createPost(beehivId: string, title: string, publishedAt: string) {
     const result = await this.database.query(
       `INSERT INTO posts ("beehivId", title, "publishedAt") VALUES ($1,$2,$3) RETURNING *;`,
