@@ -93,6 +93,17 @@ export class UserRepository {
       row.updatedAt,
     );
   }
+
+  async getTotalUsers(): Promise<number> {
+    const result = await this.database.query(`SELECT COUNT(*) FROM users;`);
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const row = result.rows[0];
+    return row.count;
+  }
 }
 
 export const makeUserRepository = () => {
