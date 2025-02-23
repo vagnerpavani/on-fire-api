@@ -26,6 +26,7 @@ export const createFakeUser = async (
     row.id,
     row.email,
     row.recordStreak,
+    row.currentStreak,
     row.createdAt,
     row.updatedAt,
   );
@@ -101,25 +102,30 @@ export const createFakeStreak = async () => {
 
     const userResult =
       await db.query(`INSERT INTO users ("email", "recordStreak") 
-    VALUES ('teste@email.com', 4) RETURNING *`);
+    VALUES ('${faker.internet.email()}', ${faker.number.int({ max: 30 })}) RETURNING *`);
 
-    await db.query(`INSERT INTO posts ("beehivId", title, "publishedAt") 
-    VALUES ('post_00-00-01','title',Now()) RETURNING *;`);
+    let postCount = 0;
+    const posts = [];
+    while (postCount < 3) {
+      const postResult = await db.query(
+        `INSERT INTO posts ("beehivId", title, "publishedAt") 
+        VALUES ('post_00-00-0${postCount + 1}}',$1 ,$2) RETURNING *;`,
+        [faker.lorem.sentence(3), dayjs().subtract(postCount, 'days')],
+      );
 
-    await db.query(`INSERT INTO posts ("beehivId", title, "publishedAt") 
-    VALUES ('post_00-00-02','title',Now()) RETURNING *;`);
+      posts.push(postResult.rows[0]);
+      postCount++;
+    }
 
-    await db.query(`INSERT INTO posts ("beehivId", title, "publishedAt") 
-    VALUES ('post_00-00-03','title',Now()) RETURNING *;`);
-
-    await db.query(`INSERT INTO reads ("userId","postId","createdAt") 
-    VALUES (1,1, '2025-02-19T17:29:14.809Z') RETURNING *;`);
-
-    await db.query(`INSERT INTO reads ("userId","postId","createdAt") 
-    VALUES (1,2, '2025-02-20T17:29:14.809Z') RETURNING *;`);
-
-    await db.query(`INSERT INTO reads ("userId","postId","createdAt") 
-    VALUES (1,3, '2025-02-21T17:29:14.809Z') RETURNING *;`);
+    let days = 0;
+    for (const post of posts) {
+      await db.query(
+        `INSERT INTO reads ("userId","postId","createdAt") 
+        VALUES ($1,$2,$3) RETURNING *;`,
+        [userResult.rows[0].id, post.id, dayjs().subtract(days, 'days')],
+      );
+      days++;
+    }
 
     await db.query('COMMIT');
 
@@ -128,6 +134,7 @@ export const createFakeStreak = async () => {
       row.id,
       row.email,
       row.recordStreak,
+      row.currentStreak,
       row.createdAt,
       row.updatedAt,
     );
