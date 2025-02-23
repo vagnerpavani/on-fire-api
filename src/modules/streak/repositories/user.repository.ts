@@ -115,7 +115,7 @@ export class UserRepository {
     rank: 'currentStreak' | 'recordStreak',
     postId: string,
     startAt: string,
-    endAt,
+    endAt: string,
   ): Promise<User[]> {
     const filters = [];
     if (postId) filters.push(postId);
