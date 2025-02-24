@@ -15,6 +15,8 @@ npm install
 npm run start:dev
 ```
 
+Se precisar popular o banco com alguns dados para ver nos dashboards, o arquivo `src/scripts/SEED.sql` pode ser usado.
+
 # Camadas arquiteturais
 
 ## Modules
