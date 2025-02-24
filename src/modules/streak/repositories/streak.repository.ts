@@ -228,7 +228,7 @@ export class StreakRepository {
     );
 
     return result.rows.map((row) => {
-      return { name: row[col], value: row[`${col}Total`] };
+      return { name: row[col], value: Number(row[`${col}Total`]) };
     });
   }
 
