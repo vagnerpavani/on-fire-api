@@ -50,9 +50,11 @@ export class StreakRepository {
       `SELECT reads.*, users.id AS "userId_PK", 
       users."createdAt" AS "userCreatedAt",
       users."updatedAt" AS "userUpdatedAt",
+      users."currentStreak",
       users."recordStreak",
       users.email
-      FROM reads JOIN users ON reads."userId" = $1
+      FROM reads JOIN users ON reads."userId" = users.id
+      WHERE users.id = $1
       ORDER BY reads."createdAt" DESC;`,
       [userId],
     );
@@ -67,6 +69,7 @@ export class StreakRepository {
       result.rows[0].userId_PK,
       result.rows[0].email,
       result.rows[0].recordStreak,
+      result.rows[0].currentStreak,
       result.rows[0].userCreatedAt,
       result.rows[0].userUpdatedAt,
     );
