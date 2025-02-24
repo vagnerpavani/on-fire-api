@@ -117,9 +117,9 @@ export class StreakRepository {
       ${postId || startAt || endAt ? 'WHERE' : ''}
       ${postId ? `reads."postId" = $${filters.length}` : ''}
       ${(postId && startAt) || (postId && endAt) ? 'AND' : ''}
-      ${startAt && !endAt ? `reads."createdAt" >= $1` : ''}
-      ${!startAt && endAt ? `reads."createdAt" <= $1` : ''}
-      ${startAt && endAt ? 'reads."createdAt" BETWEEN $1 AND $2' : ''}
+      ${startAt && !endAt ? `posts."publishedAt" >= $1` : ''}
+      ${!startAt && endAt ? `posts."publishedAt" <= $1` : ''}
+      ${startAt && endAt ? 'posts."publishedAt" BETWEEN $1 AND $2' : ''}
       ORDER BY posts."publishedAt" ASC`;
 
     const result = await this.database.query(filterQuery, filters);
