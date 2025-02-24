@@ -3,10 +3,6 @@ import { expand as dotEnvExpand } from 'dotenv-expand';
 import { resolve } from 'path';
 
 export function loadEnv(): void {
-  if (!process.env.NODE_ENV) {
-    throw new Error('NODE_ENV must be defined');
-  }
-
   const dotEnvConfig =
     process.env.NODE_ENV !== 'production'
       ? dotenv.config({
