@@ -117,7 +117,7 @@ export class StreakRepository {
       ${startAt && !endAt ? `reads."createdAt" >= $1` : ''}
       ${!startAt && endAt ? `reads."createdAt" <= $1` : ''}
       ${startAt && endAt ? 'reads."createdAt" BETWEEN $1 AND $2' : ''}
-      ORDER BY posts.id, users.id;`;
+      ORDER BY posts."publishedAt" ASC`;
 
     const result = await this.database.query(filterQuery, filters);
 
@@ -170,6 +170,66 @@ export class StreakRepository {
     });
 
     return Array.from(postsMap.values());
+  }
+
+  async getStreakUtmStats(startAt?: string, endAt?: string, postId?: string) {
+    const campaignResults = await this.utmSearch(
+      'utmCampaign',
+      startAt,
+      endAt,
+      postId,
+    );
+
+    const sourceResults = await this.utmSearch(
+      'utmSource',
+      startAt,
+      endAt,
+      postId,
+    );
+
+    const mediumResults = await this.utmSearch(
+      'utmMedium',
+      startAt,
+      endAt,
+      postId,
+    );
+
+    return {
+      campaignResults,
+      sourceResults,
+      mediumResults,
+    };
+  }
+
+  private async utmSearch(
+    col: string,
+    startAt?: string,
+    endAt?: string,
+    postId?: string,
+  ) {
+    const filters = [];
+    if (startAt) filters.push(startAt);
+    if (endAt) filters.push(endAt);
+    if (postId) filters.push(postId);
+
+    const result = await this.database.query(
+      `
+    SELECT reads."${col}", COUNT(*) AS "${col}Total"
+    FROM reads
+    ${postId || startAt || endAt ? 'WHERE' : ''}
+    ${postId ? `reads."postId" = $${filters.length}` : ''}
+    ${(postId && startAt) || (postId && endAt) ? 'AND' : ''}
+    ${startAt && !endAt ? `reads."createdAt" >= $1` : ''}
+    ${!startAt && endAt ? `reads."createdAt" <= $1` : ''}
+    ${startAt && endAt ? 'reads."createdAt" BETWEEN $1 AND $2' : ''}
+    GROUP BY reads."${col}"
+    `,
+      filters,
+    );
+
+    return result.rows.map((row) => {
+      return { name: row[col], value: row[`${col}Total`] };
+    });
   }
 
   async resetStreak(postId: string) {

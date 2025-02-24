@@ -69,12 +69,19 @@ export class GetStreakStatsUseCase {
       };
     });
 
+    const trafficStats = await this.streakRepository.getStreakUtmStats(
+      startAt,
+      endAt,
+      postId,
+    );
+
     return {
       posts,
       totalUsers,
       peopleWithStreak,
       postRecords,
       userStreakLoss,
+      ...trafficStats,
     };
   }
 }
