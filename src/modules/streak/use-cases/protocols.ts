@@ -22,4 +22,4 @@ export class PostNotFoundException extends Error {
   }
 }
 
-export type StreakStatus = 'streak' | 'no streak' | null;
+export type StreakStatus = 'streak' | 'no-streak' | null;

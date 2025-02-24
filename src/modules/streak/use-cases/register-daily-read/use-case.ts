@@ -12,6 +12,7 @@ import {
   DailyReadAlreadyExistException,
   NotTodayPostException,
 } from '../protocols';
+import { WEEKDAYS } from '../constants';
 
 export class RegisterDailyReadUseCase {
   constructor(
@@ -21,6 +22,7 @@ export class RegisterDailyReadUseCase {
   ) {}
 
   async execute(read: RegisterDailyReadDto) {
+    if (dayjs().day() === WEEKDAYS.SUNDAY) return;
     const publishedDate = dayjs(read.publishedAt).startOf('day');
     const today = dayjs().startOf('day');
 

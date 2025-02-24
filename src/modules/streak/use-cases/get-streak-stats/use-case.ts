@@ -1,3 +1,4 @@
+import { STREAK_STATUS } from '../../constants';
 import {
   makeStreakRepository,
   makeUserRepository,
@@ -25,7 +26,7 @@ export class GetStreakStatsUseCase {
       streakStatus,
     );
 
-    const totalUsers = await this.userRepository.getTotalUsers();
+    const totalUsers = await this.userRepository.getTotalUsers(streakStatus);
 
     const peopleWithStreak = posts.map((post) => {
       const userWithStreak = post.users.filter((user) => {
@@ -33,15 +34,17 @@ export class GetStreakStatsUseCase {
       });
 
       const userWithNoStreak = post.users.filter((user) => {
-        return user.currentStreak < 1;
+        return user.currentStreak <= 1;
       });
 
       return {
         postId: post.id,
         title: post.title,
         publishedAt: post.publishedAt,
-        userWithStreak: userWithStreak.length,
-        userWithNoStreak: userWithNoStreak.length,
+        userWithStreak:
+          streakStatus === STREAK_STATUS.NO_STREAK ? 0 : userWithStreak.length,
+        userWithNoStreak:
+          streakStatus === STREAK_STATUS.STREAK ? 0 : userWithNoStreak.length,
       };
     });
 

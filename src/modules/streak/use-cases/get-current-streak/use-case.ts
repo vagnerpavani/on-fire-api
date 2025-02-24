@@ -24,6 +24,9 @@ export class GetCurrentStreakUseCase {
     let currentStreak = 1;
     let index = 0;
 
+    if (dayjs().day() == WEEKDAYS.SUNDAY)
+      return { currentStreak: user.currentStreak, user };
+
     do {
       if (index + 1 >= reads.length) break;
 

@@ -2,6 +2,8 @@ import { Pool } from 'pg';
 import { db } from 'src/config';
 
 import { User } from 'src/modules/streak/entities';
+import { STREAK_STATUS } from '../constants';
+import { StreakStatus } from '../use-cases';
 
 export class UserRepository {
   constructor(private readonly database: Pool) {}
@@ -100,8 +102,10 @@ export class UserRepository {
     );
   }
 
-  async getTotalUsers(): Promise<number> {
-    const result = await this.database.query(`SELECT COUNT(*) FROM users;`);
+  async getTotalUsers(streakStatus?: StreakStatus): Promise<number> {
+    const result = await this.database.query(`SELECT COUNT(*) FROM users 
+      ${streakStatus === STREAK_STATUS.NO_STREAK ? 'WHERE users."currentStreak" <= 1' : ''}
+      ${streakStatus === STREAK_STATUS.STREAK ? 'WHERE users."currentStreak" >= 1' : ''};`);
 
     if (result.rows.length === 0) {
       return null;
