@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
 import {
@@ -71,7 +72,7 @@ export class StreakController {
 
   @Get('stats')
   async getStreakStats(
-    @Param()
+    @Query()
     params: {
       startAt: string;
       endAt: string;
@@ -88,6 +89,7 @@ export class StreakController {
         ? streakStatuses[params.streakStatus]
         : null;
 
+      console.log(params);
       return await this.getStreakStatsUseCase.execute(
         params.startAt,
         params.endAt,
@@ -102,7 +104,7 @@ export class StreakController {
 
   @Get('ranking')
   async getStreakRanking(
-    @Param()
+    @Query()
     params: {
       startAt: string;
       endAt: string;
